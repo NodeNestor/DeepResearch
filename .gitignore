@@ -1,0 +1,45 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# Environment
+.env
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Docker
+docker-compose.override.yml
+
+# Data
+data/
+*.db
+*.sqlite
+
+# Node
+node_modules/
+orchestrator/frontend/dist/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# SearXNG runtime
+searxng/uwsgi.ini
+
+# Deep memory explorer (separate project, not part of this repo)
+deep-memory-explorer/

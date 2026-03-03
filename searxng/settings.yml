@@ -1,0 +1,91 @@
+use_default_settings: true
+
+general:
+  instance_name: "DeepResearch SearXNG"
+  debug: false
+
+search:
+  safe_search: 0
+  autocomplete: ""
+  default_lang: "en"
+  formats:
+    - html
+    - json
+
+server:
+  secret_key: "deepresearch-searxng-secret-change-me"
+  bind_address: "0.0.0.0"
+  port: 8080
+  limiter: false
+  public_instance: false
+
+ui:
+  static_use_hash: true
+
+engines:
+  # Web search
+  - name: google
+    engine: google
+    shortcut: g
+    disabled: false
+
+  - name: bing
+    engine: bing
+    shortcut: b
+    disabled: false
+
+  - name: duckduckgo
+    engine: duckduckgo
+    shortcut: dd
+    disabled: false
+
+  # Academic
+  - name: arxiv
+    engine: arxiv
+    shortcut: ax
+    disabled: false
+
+  - name: google scholar
+    engine: google_scholar
+    shortcut: gs
+    disabled: false
+
+  - name: semantic scholar
+    engine: semantic_scholar
+    shortcut: ss
+    disabled: false
+
+  # Code & Tech
+  - name: github
+    engine: github
+    shortcut: gh
+    disabled: false
+
+  - name: stackoverflow
+    engine: stackoverflow
+    shortcut: so
+    disabled: false
+
+  # Community
+  - name: reddit
+    engine: reddit
+    shortcut: re
+    disabled: false
+
+  # Reference
+  - name: wikipedia
+    engine: wikipedia
+    shortcut: wp
+    disabled: false
+
+  - name: wikidata
+    engine: wikidata
+    shortcut: wd
+    disabled: false
+
+outgoing:
+  request_timeout: 10
+  max_request_timeout: 15
+  useragent_suffix: ""
+  pool_connections: 100
+  pool_maxsize: 20

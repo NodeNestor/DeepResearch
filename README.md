@@ -35,43 +35,108 @@ open http://localhost:8082
 
 No external API keys required — all 8 sources are free and the LLM runs locally.
 
+## How It Works
+
+```mermaid
+graph TB
+    User(["🔍 User Query"])
+
+    User --> PK["Phase 0: Prior Knowledge Check
+    Query HiveMindDB for existing facts & entities"]
+
+    PK --> Dual
+
+    subgraph Dual ["⚡ Phase 1: Parallel Dual Search (simultaneous)"]
+        direction LR
+        subgraph Swarm ["Branch A: Memory Swarm"]
+            SA1["Agent 1: Technical details"]
+            SA2["Agent 2: Timeline"]
+            SA3["Agent 3: Competing approaches"]
+            SA4["Agent 4: Limitations"]
+            SA5["Agent N: ..."]
+        end
+        subgraph Web ["Branch B: Web Research"]
+            QE["Query Explosion
+            4 queries × 8 sources = 32 searches"]
+            QE --> Sources
+            subgraph Sources ["8 Source Types"]
+                S1["🌐 Web"]
+                S2["📄 ArXiv"]
+                S3["💻 GitHub"]
+                S4["💬 Reddit"]
+                S5["🎥 YouTube"]
+                S6["📚 Semantic Scholar"]
+                S7["🤗 HuggingFace"]
+                S8["📖 Wikipedia"]
+            end
+            Sources --> FE["Fetch + Extract
+            100 concurrent LLM calls"]
+        end
+    end
+
+    Dual --> Merge["Merge + Deduplicate
+    Facts from memory + facts from web"]
+
+    Merge --> Store["Phase 2: Store in Knowledge Graph
+    Facts → Memories | Entities → Nodes | Relations → Edges"]
+
+    Store --> Complete{"Phase 3: Complete?
+    Coverage score
+    Diminishing returns
+    Entity saturation"}
+
+    Complete -->|"❌ Gaps found"| Gap["Generate gap-targeted queries"]
+    Gap --> Web
+
+    Complete -->|"✅ Sufficient"| Synth["Phase 5: Synthesis
+    Big model writes final report
+    with temporal context"]
+
+    Synth --> Report(["📋 Research Report
+    + facts, entities, citations"])
+
+    Store -.->|"Knowledge persists"| HiveMind[("HiveMindDB
+    Knowledge Graph")]
+    HiveMind -.->|"Recalled next time"| Swarm
+
+    style Dual fill:#1a1a2e,stroke:#16213e,color:#fff
+    style Swarm fill:#0f3460,stroke:#16213e,color:#fff
+    style Web fill:#0f3460,stroke:#16213e,color:#fff
+    style Sources fill:#1a1a2e,stroke:#533483,color:#fff
+    style Complete fill:#e94560,stroke:#e94560,color:#fff
+    style Report fill:#0f3460,stroke:#533483,color:#fff
+    style HiveMind fill:#533483,stroke:#533483,color:#fff
+```
+
+> **Key insight**: The knowledge graph grows with every research run. The Memory Swarm gives you instant recall of everything learned in past sessions, while web search finds new information. Both run at the same time — even on the first run (swarm just returns nothing from an empty DB).
+
 ## Architecture
 
 ```
-┌──────────────────────────────────────────────────────────────┐
-│                    docker compose up                          │
-├──────────┬───────────┬──────────────────┬────────────────────┤
-│ SearXNG  │ HiveMindDB│   DeepResearch   │      vLLM          │
-│ :8888    │ :8100     │   :8082          │      :8000          │
-│          │           │                  │                     │
-│ Meta-    │ Knowledge │ ┌──────────────┐ │ Local LLM           │
-│ search   │ graph +   │ │  Web UI      │ │ (Qwen3.5 0.8B)     │
-│ engine   │ vector DB │ │  REST API    │ │                     │
-│          │           │ │  WebSocket   │ │                     │
-│          │           │ │  MCP Server  │ │                     │
-│          │           │ └──────────────┘ │                     │
-└──────────┴───────────┴──────────────────┴────────────────────┘
-              All on deepresearch-net bridge network
-```
-
-## Research Pipeline
-
-```
-Query
-  │
-  ├─ Phase 0: Prior Knowledge ─── check HiveMindDB for existing facts
-  │
-  ├─ Phase 1: PARALLEL DUAL SEARCH (asyncio.gather)
-  │   ├─ Branch A: Memory Swarm ── N small-model agents explore knowledge graph
-  │   └─ Branch B: Web Research ── query explosion → 8 sources → fetch + extract
-  │   └─ Merge + deduplicate results from both branches
-  │
-  ├─ Phase 2: Store ── facts → memories, entities → graph, relations → edges
-  │
-  ├─ Phase 3: Completeness Check ── coverage scoring, diminishing returns
-  │   └─ If incomplete → generate gap queries → back to Phase 1 Branch B
-  │
-  └─ Phase 5: Synthesis ── big model writes final report with temporal context
+┌──────────────────────────────────────────────────────────────────┐
+│                       docker compose up                          │
+│                                                                  │
+│  ┌──────────┐  ┌───────────┐  ┌──────────────┐  ┌───────────┐  │
+│  │ SearXNG  │  │ HiveMindDB│  │ DeepResearch │  │   vLLM    │  │
+│  │ :8888    │  │ :8100     │  │ :8082        │  │   :8000   │  │
+│  │          │  │           │  │              │  │           │  │
+│  │ Meta-    │  │ Knowledge │  │  Web UI      │  │ Extraction│  │
+│  │ search   │◄─┤ graph +   │◄─┤  REST API    │─►│ model     │  │
+│  │ engine   │  │ vector DB │  │  WebSocket   │  │ (small)   │  │
+│  │          │  │           │  │  MCP Server  │  │           │  │
+│  └──────────┘  └───────────┘  └──────┬───────┘  └───────────┘  │
+│                                      │                           │
+│            deepresearch-net          │                           │
+└──────────────────────────────────────┼───────────────────────────┘
+                                       │
+                                       ▼
+                              ┌──────────────────┐
+                              │ Synthesis model   │
+                              │ (any provider)    │
+                              │                   │
+                              │ ModelGate, OpenAI, │
+                              │ Ollama, vLLM, ... │
+                              └──────────────────┘
 ```
 
 ## Two-Model Architecture

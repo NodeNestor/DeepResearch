@@ -38,38 +38,33 @@ No external API keys required — all 8 sources are free and the LLM runs locall
 ## How It Works
 
 ```mermaid
-graph TB
-    User(["🔍 User Query"]) --> PK["Check existing knowledge in HiveMindDB"]
+graph LR
+    User(["🔍 Query"]) --> PK["Check existing
+    knowledge"]
 
-    PK --> Dual
+    PK --> Swarm["🧠 Memory Swarm
+    N agents explore
+    knowledge graph"]
+    PK --> Web["🌐 Web Research
+    8 sources searched
+    in parallel"]
 
-    subgraph Dual ["⚡ Parallel Dual Search — both run simultaneously"]
-        direction LR
-        Swarm["🧠 Memory Swarm
-        N parallel agents explore
-        knowledge graph with
-        different research angles"]
+    Swarm --> Merge["Merge +
+    deduplicate"]
+    Web --> Merge
 
-        Web["🌐 Web Research
-        Query explosion → search 8 sources
-        (Web, ArXiv, GitHub, Reddit, YouTube,
-        Semantic Scholar, HuggingFace, Wikipedia)
-        → fetch pages → LLM extraction"]
-    end
+    Merge --> Store["Store in
+    knowledge graph"]
 
-    Dual --> Merge["Merge + deduplicate facts from both branches"]
-    Merge --> Store["Store: facts → memories, entities → graph nodes, relations → edges"]
+    Store --> Complete{"Complete?"}
+    Complete -->|"Gaps"| Web
+    Complete -->|"✅"| Synth["✨ Synthesis
+    model writes report"]
+    Synth --> Report(["📋 Report"])
 
-    Store --> Complete{"Complete enough?"}
+    Store -.-> HiveMind[("HiveMindDB")]
+    HiveMind -.-> Swarm
 
-    Complete -->|"Gaps found"| Gap["Generate gap queries"] --> Web
-    Complete -->|"✅ Done"| Synth["✨ Synthesis model writes final report"]
-    Synth --> Report(["📋 Research Report"])
-
-    Store -.->|"Persists"| HiveMind[("HiveMindDB")]
-    HiveMind -.->|"Recalled next run"| Swarm
-
-    style Dual fill:#1a1a2e,stroke:#16213e,color:#fff
     style Swarm fill:#0f3460,stroke:#16213e,color:#fff
     style Web fill:#0f3460,stroke:#16213e,color:#fff
     style Complete fill:#e94560,stroke:#e94560,color:#fff

@@ -39,72 +39,40 @@ No external API keys required — all 8 sources are free and the LLM runs locall
 
 ```mermaid
 graph TB
-    User(["🔍 User Query"])
-
-    User --> PK["Phase 0: Prior Knowledge Check
-    Query HiveMindDB for existing facts & entities"]
+    User(["🔍 User Query"]) --> PK["Check existing knowledge in HiveMindDB"]
 
     PK --> Dual
 
-    subgraph Dual ["⚡ Phase 1: Parallel Dual Search (simultaneous)"]
+    subgraph Dual ["⚡ Parallel Dual Search — both run simultaneously"]
         direction LR
-        subgraph Swarm ["Branch A: Memory Swarm"]
-            SA1["Agent 1: Technical details"]
-            SA2["Agent 2: Timeline"]
-            SA3["Agent 3: Competing approaches"]
-            SA4["Agent 4: Limitations"]
-            SA5["Agent N: ..."]
-        end
-        subgraph Web ["Branch B: Web Research"]
-            QE["Query Explosion
-            4 queries × 8 sources = 32 searches"]
-            QE --> Sources
-            subgraph Sources ["8 Source Types"]
-                S1["🌐 Web"]
-                S2["📄 ArXiv"]
-                S3["💻 GitHub"]
-                S4["💬 Reddit"]
-                S5["🎥 YouTube"]
-                S6["📚 Semantic Scholar"]
-                S7["🤗 HuggingFace"]
-                S8["📖 Wikipedia"]
-            end
-            Sources --> FE["Fetch + Extract
-            100 concurrent LLM calls"]
-        end
+        Swarm["🧠 Memory Swarm
+        N parallel agents explore
+        knowledge graph with
+        different research angles"]
+
+        Web["🌐 Web Research
+        Query explosion → search 8 sources
+        (Web, ArXiv, GitHub, Reddit, YouTube,
+        Semantic Scholar, HuggingFace, Wikipedia)
+        → fetch pages → LLM extraction"]
     end
 
-    Dual --> Merge["Merge + Deduplicate
-    Facts from memory + facts from web"]
+    Dual --> Merge["Merge + deduplicate facts from both branches"]
+    Merge --> Store["Store: facts → memories, entities → graph nodes, relations → edges"]
 
-    Merge --> Store["Phase 2: Store in Knowledge Graph
-    Facts → Memories | Entities → Nodes | Relations → Edges"]
+    Store --> Complete{"Complete enough?"}
 
-    Store --> Complete{"Phase 3: Complete?
-    Coverage score
-    Diminishing returns
-    Entity saturation"}
+    Complete -->|"Gaps found"| Gap["Generate gap queries"] --> Web
+    Complete -->|"✅ Done"| Synth["✨ Synthesis model writes final report"]
+    Synth --> Report(["📋 Research Report"])
 
-    Complete -->|"❌ Gaps found"| Gap["Generate gap-targeted queries"]
-    Gap --> Web
-
-    Complete -->|"✅ Sufficient"| Synth["Phase 5: Synthesis
-    Big model writes final report
-    with temporal context"]
-
-    Synth --> Report(["📋 Research Report
-    + facts, entities, citations"])
-
-    Store -.->|"Knowledge persists"| HiveMind[("HiveMindDB
-    Knowledge Graph")]
-    HiveMind -.->|"Recalled next time"| Swarm
+    Store -.->|"Persists"| HiveMind[("HiveMindDB")]
+    HiveMind -.->|"Recalled next run"| Swarm
 
     style Dual fill:#1a1a2e,stroke:#16213e,color:#fff
     style Swarm fill:#0f3460,stroke:#16213e,color:#fff
     style Web fill:#0f3460,stroke:#16213e,color:#fff
-    style Sources fill:#1a1a2e,stroke:#533483,color:#fff
     style Complete fill:#e94560,stroke:#e94560,color:#fff
-    style Report fill:#0f3460,stroke:#533483,color:#fff
     style HiveMind fill:#533483,stroke:#533483,color:#fff
 ```
 

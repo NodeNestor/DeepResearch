@@ -73,6 +73,20 @@ graph LR
 
 > **Key insight**: The knowledge graph grows with every research run. The Memory Swarm gives you instant recall of everything learned in past sessions, while web search finds new information. Both run at the same time — even on the first run (swarm just returns nothing from an empty DB).
 
+### Example: What a single research run looks like
+
+Token usage varies hugely depending on query complexity, depth, and how many sources return results. Here are real numbers from test runs on a Qwen3.5-0.8B extraction model:
+
+| Query | Depth | Facts | Entities | Pages Fetched | LLM Calls | Total Tokens | Time |
+|-------|-------|-------|----------|---------------|-----------|-------------|------|
+| Simple factual question | 1 | ~34 | ~61 | ~89 | ~95 | ~800K | ~2 min |
+| Broad research topic | 2 | ~109 | ~125 | ~331 | ~340 | ~2.5M | ~6 min |
+| Deep open-ended topic | 3+ | ~200+ | ~200+ | ~500+ | ~550+ | ~5M+ | ~12 min |
+
+The 0.8B model is extremely cheap to run — those millions of tokens cost nothing on local hardware. Earlier unoptimized runs with larger context windows hit 6M+ tokens on a single query. Completeness detection now stops early when returns diminish, saving significant compute.
+
+With a 16GB GPU, the 0.8B model processes ~4,400 tokens/sec across concurrent requests, so even a 2.5M token run only needs ~10 minutes of actual GPU time.
+
 ## Architecture
 
 ```

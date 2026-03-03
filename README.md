@@ -85,7 +85,7 @@ Token usage varies hugely depending on query complexity, depth, and how many sou
 
 The 0.8B model is extremely cheap to run — those millions of tokens cost nothing on local hardware. Earlier unoptimized runs with larger context windows hit 6M+ tokens on a single query. Completeness detection now stops early when returns diminish, saving significant compute.
 
-With a 16GB GPU, the 0.8B model processes ~4,400 tokens/sec across concurrent requests, so even a 2.5M token run only needs ~10 minutes of actual GPU time.
+With a 16GB GPU (RTX 5060 Ti), the 0.8B model generates ~500-1,000 tokens/sec across concurrent requests depending on context length, with total throughput (prompt + generation) reaching ~4,000-11,000 tokens/sec thanks to batched prefill.
 
 ## Architecture
 
